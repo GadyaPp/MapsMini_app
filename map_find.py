@@ -3,16 +3,18 @@ import sys
 
 import requests
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QInputDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QInputDialog, QLineEdit
 
-SCREEN_SIZE = [600, 450]
-# 37.530887,55.703118
+SCREEN_SIZE = [600, 500]
+# 37.530887 55.703118
 
-class Example(QWidget):
+
+class Map(QWidget):
     def __init__(self):
         super().__init__()
         self.coordinate = self.get_coord()
-        self.getImage(self.coordinate)
+        self.REQUEST = f"http://static-maps.yandex.ru/1.x/?ll={self.coordinate[0]},{self.coordinate[1]}&spn=0.002,0.002&l=map"
+        self.getImage(self.REQUEST)
         self.initUI()
 
     def get_coord(self):
@@ -21,10 +23,10 @@ class Example(QWidget):
         if okBtnPressed:
             if __name__ == '__main__':
                 coor = coor.split()
-                return coor[0], coor[1]
+                return coor
 
-    def getImage(self, coor):
-        map_request = f"http://static-maps.yandex.ru/1.x/?ll={coor[0]},{coor[1]}&spn=0.002,0.002&l=map"
+    def getImage(self, req):
+        map_request = req
         response = requests.get(map_request)
 
         if not response:
@@ -47,12 +49,19 @@ class Example(QWidget):
         self.image.resize(600, 450)
         self.image.setPixmap(self.pixmap)
 
+        self.name_label = QLabel(self)
+        self.name_label.setText("Поиск: ")
+        self.name_label.move(260, 470)
+
+        self.name_input = QLineEdit(self)
+        self.name_input.move(300, 470)
+
     def closeEvent(self, event):
         os.remove(self.map_file)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = Example()
+    ex = Map()
     ex.show()
     sys.exit(app.exec())
