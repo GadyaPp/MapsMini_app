@@ -3,19 +3,28 @@ import sys
 
 import requests
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QInputDialog
 
 SCREEN_SIZE = [600, 450]
-
+# 37.530887,55.703118
 
 class Example(QWidget):
     def __init__(self):
         super().__init__()
-        self.getImage()
+        self.coordinate = self.get_coord()
+        self.getImage(self.coordinate)
         self.initUI()
 
-    def getImage(self):
-        map_request = "http://static-maps.yandex.ru/1.x/?ll=37.530887,55.703118&spn=0.002,0.002&l=map"
+    def get_coord(self):
+        coor, okBtnPressed = QInputDialog.getText(self, "Координаты",
+                                               "Введите координаты через пробел")
+        if okBtnPressed:
+            if __name__ == '__main__':
+                coor = coor.split()
+                return coor[0], coor[1]
+
+    def getImage(self, coor):
+        map_request = f"http://static-maps.yandex.ru/1.x/?ll={coor[0]},{coor[1]}&spn=0.002,0.002&l=map"
         response = requests.get(map_request)
 
         if not response:
