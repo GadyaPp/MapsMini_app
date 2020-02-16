@@ -2,6 +2,7 @@ import os
 import sys
 
 import requests
+from PyQt5.QtCore import Qt as core
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QInputDialog, QLineEdit, QPushButton
 
@@ -15,13 +16,21 @@ api_server = "http://static-maps.yandex.ru/1.x/"
 class Map(QWidget):
     def __init__(self):
         super().__init__()
-        self.lon, self.lat = self.get_coord()
+        self.coordinate = self.get_coord()
         self.delta = "0.002"
-        self.REQUEST = {"ll": ",".join([self.lon, self.lat]),
+        self.REQUEST = {"ll": ",".join([self.coordinate[0], self.coordinate[1]]),
                         "spn": ",".join([self.delta, self.delta]),
                         "l": "map"}
         self.getImage(self.REQUEST)
         self.initUI()
+
+    def get_coord(self):
+        coor, okBtnPressed = QInputDialog.getText(self, "Координаты",
+                                               "Введите координаты через пробел")
+        if okBtnPressed:
+            if __name__ == '__main__':
+                coor = coor.split()
+                return coor
 
     def get_coord(self):
         coor, okBtnPressed = QInputDialog.getText(self, "Координаты",
@@ -90,6 +99,32 @@ class Map(QWidget):
             "pt": ",".join([toponym_longitude, toponym_lattitude]) + ",pm2rdm1"
         }
         self.getImage(map_params)
+        self.pixmap = QPixmap(self.map_file)
+        self.image.setPixmap(self.pixmap)
+
+    def keyPressEvent(self, e):
+        if e.key() == core.Key_S:
+            self.coordinate[1] = str(float(self.coordinate[1]) - 0.0003)
+
+        if e.key() == core.Key_W:
+            self.coordinate[1] = str(float(self.coordinate[1]) + 0.0003)
+
+        if e.key() == core.Key_A:
+            self.coordinate[0] = str(float(self.coordinate[0]) - 0.0003)
+
+        if e.key() == core.Key_D:
+            self.coordinate[0] = str(float(self.coordinate[0]) + 0.0003)
+
+        if e.key() == core.Key_PageDown:
+            self.delta = str(float(self.delta) + 0.002)
+            
+        if e.key() == core.Key_PageUp:
+            self.delta = str(float(self.delta) - 0.002)
+
+
+        self.getImage({"ll": ",".join([self.coordinate[0], self.coordinate[1]]),
+                        "spn": ",".join([self.delta, self.delta]),
+                        "l": "map"})
         self.pixmap = QPixmap(self.map_file)
         self.image.setPixmap(self.pixmap)
 
